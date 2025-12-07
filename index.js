@@ -5,7 +5,7 @@ const express = require("express");
 const PORT = 10000;
 const app = express();
 const bot = new Telegraf(process.env.TG_BOT_TOKEN || "");
-const BASE_URL = "https://api.binance.com/fapi/v1";
+const BASE_URL = "https://fapi.binance.com/fapi/v1";
 let toplam_islem_sayisi = 0;
 
 const intervals = {
