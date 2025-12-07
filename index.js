@@ -2,9 +2,24 @@ const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
 const express = require("express");
 
+const PORT = 10000;
 const app = express();
 const bot = new Telegraf(process.env.TG_BOT_TOKEN || "DEFAULT_BOT_TOKEN");
 const BASE_URL = "https://api.binance.com/api/v3";
+
+let istek_sayisi = 0;
+
+const intervals = {
+    int_1m: "1m",
+    int_3m: "3m",
+    int_5m: "5m",
+    int_15m: "15m",
+    int_30m: "30m",
+    int_1h: "1h",
+    int_4h: "4h",
+    int_12h: "12h",
+    int_1d: "1d"
+};
 
 async function getPercentageChange(symbol, interval) {
     try {
@@ -39,7 +54,7 @@ async function findTopGainers(interval) {
                 .then(change => {
                     if (change !== null) results.push({ symbol: sym, change });
                 })
-                .catch(() => {})
+                .catch(() => { })
         );
 
         await Promise.all(promises);
@@ -53,9 +68,29 @@ async function findTopGainers(interval) {
 }
 
 bot.start(ctx => {
+    const user = ctx.from;
+    const timestamp = new Date().toLocaleString("tr-TR");
+
+    console.log(
+        `\n[START KOMUTU]\n` +
+        `Tarih: ${timestamp}\n` +
+        `ID: ${user.id}\n` +
+        `Ad: ${user.first_name} ${user.last_name || ""}\n` +
+        `Username: @${user.username || "yok"}\n`
+    );
+
     ctx.reply(
-        "📊 *MC Binance Bot*\n\nHoşgeldiniz!\n/binance komutu ile en çok yükselen coinleri görebilirsiniz.",
-        { parse_mode: "Markdown", reply_markup: { remove_keyboard: true } }
+        "👋 *Hoş Geldiniz!*\n\n" +
+        "📊 Bu bot ile **Binance'daki en çok yükselen coinleri** hızlı şekilde görebilirsiniz.\n\n" +
+        "Başlamak için aşağıdaki komutu kullanın:\n" +
+        "➡️ */binance*\n\n" +
+        "Her zaman yardım için buradayım! 🚀",
+        {
+            parse_mode: "Markdown",
+            reply_markup: {
+                remove_keyboard: true
+            }
+        }
     );
 });
 
@@ -66,55 +101,70 @@ bot.command("binance", ctx => {
             parse_mode: "Markdown",
             ...Markup.inlineKeyboard([
                 [
-                    Markup.button.callback("1 dakika", "int_1m"),
-                    Markup.button.callback("5 dakika", "int_5m")
+                    Markup.button.callback("Son 1 dakika", "int_1m"),
+                    Markup.button.callback("Son 3 dakika", "int_3m"),
+                    Markup.button.callback("Son 5 dakika", "int_5m")
                 ],
                 [
-                    Markup.button.callback("15 dakika", "int_15m"),
-                    Markup.button.callback("30 dakika", "int_30m")
+                    Markup.button.callback("Son 15 dakika", "int_15m"),
+                    Markup.button.callback("Son 30 dakika", "int_30m"),
+                    Markup.button.callback("Son 1 saat", "int_1h")
                 ],
                 [
-                    Markup.button.callback("1 saat", "int_1h")
+                    Markup.button.callback("Son 4 saat", "int_4h"),
+                    Markup.button.callback("Son 12 saat", "int_12h"),
+                    Markup.button.callback("Son 1 gün", "int_1d"),
                 ]
             ])
         }
     );
 });
 
-const intervals = {
-    int_1m: "1m",
-    int_5m: "5m",
-    int_15m: "15m",
-    int_30m: "30m",
-    int_1h: "1h"
-};
-
-let istek_sayisi = 0;
-
 for (const key in intervals) {
     bot.action(key, async ctx => {
-        try { await ctx.answerCbQuery('Hesaplanıyor...', true); } catch {}
-
+        const user = ctx.from;
+        const timestamp = new Date().toLocaleString("tr-TR");
         const interval = intervals[key];
-        const intervalT = interval.replace("m", " dakika").replace("h", " saat");
+        const intervalT = interval
+            .replace("m", " dakika")
+            .replace("h", " saat")
+            .replace("d", " gün");
+
+        console.log(
+            `\n[INTERVAL SEÇİMİ]\n` +
+            `Tarih: ${timestamp}\n` +
+            `Kullanıcı ID: ${user.id}\n` +
+            `Ad: ${user.first_name} ${user.last_name || ""}\n` +
+            `Username: @${user.username || "yok"}\n` +
+            `Seçilen Aralık: ${interval} (${intervalT})\n`
+        );
+
+        try { 
+            await ctx.answerCbQuery("⏳ Hesaplama başladı...", true); 
+        } catch {}
 
         let loadingMessage;
         try {
-            loadingMessage = await ctx.reply(`⏳ *${intervalT}* analiz ediliyor...`, { parse_mode: "Markdown" });
+            loadingMessage = await ctx.reply(
+                `🔍 *${intervalT}* için yükselen coinler analiz ediliyor...\n\n` +
+                `Lütfen birkaç saniye bekleyin. 🚀`,
+                { parse_mode: "Markdown" }
+            );
         } catch {
             return;
         }
 
         const top = await findTopGainers(interval);
-
         let message;
+
         if (top.length === 0) {
-            message = `⚠️ *${intervalT}* için veri alınamadı.`;
+            message = `⚠️ *${intervalT}* için veri alınamadı.\n\nDaha sonra tekrar deneyin.`;
         } else {
-            message = `📈 *${intervalT} içindeki en çok yükselen coinler:*\n\n`;
-            top.forEach((item, i) => {
-                message += `${i + 1}. *${item.symbol}*: ${item.change.toFixed(2)}%\n`;
-            });
+            message =
+                `📈 *${intervalT} içindeki en çok yükselen coinler:*\n\n` +
+                top.map((item, i) =>
+                    `${i + 1}. *${item.symbol}*: ${item.change.toFixed(2)}% 📊`
+                ).join("\n");
         }
 
         try {
@@ -126,26 +176,31 @@ for (const key in intervals) {
                 { parse_mode: "Markdown" }
             );
         } catch {
-            try { await ctx.reply(message, { parse_mode: "Markdown" }); } catch {}
+            try { 
+                await ctx.reply(message, { parse_mode: "Markdown" }); 
+            } catch {}
         }
 
-        istek_sayisi++;
-        console.log("İstek sayısı:", istek_sayisi);
+        console.log(
+            `[INTERVAL TAMAMLANDI]\n` +
+            `Tarih: ${timestamp}\n` +
+            `Kullanıcı ID: ${user.id}\n` +
+            `Interval: ${interval} (${intervalT})\n` +
+            `Gönderilen sonuç sayısı: ${top.length}\n`
+        );
     });
 }
 
 async function startBot() {
-    try { await bot.telegram.deleteWebhook(); } catch {}
-    bot.catch(() => {});
+    try { await bot.telegram.deleteWebhook(); } catch { }
+    bot.catch(() => { });
     bot.launch();
-    console.log("Bot çalışıyor...");
+
+    app.get("/", (req, res) => res.send("MC Binance Bot Telegram üzerinde aktif."));
+    app.listen(PORT, () => {
+        console.log('🤖 MC Binance Telegram Bot Aktif.');
+        console.log(`🌐 Web Port Dinleme Aktif : ${PORT}`);
+    });
 }
-
-const PORT = 10000;
-
-app.get("/", (req, res) => res.send("MC Binance Bot Telegram üzerinde aktif."));
-app.listen(PORT, () => {
-    console.log("Port dinleme başlatıldı: " + PORT);
-});
 
 startBot();
