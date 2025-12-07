@@ -6,6 +6,7 @@ const PORT = 10000;
 const app = express();
 const bot = new Telegraf(process.env.TG_BOT_TOKEN || "DEFAULT_BOT_TOKEN");
 const BASE_URL = "https://api.binance.com/api/v3";
+const toplam_islem_sayisi = 0;
 
 const intervals = {
     int_1m: "1m",
@@ -132,7 +133,7 @@ for (const key in intervals) {
             }
         }
 
-        console.log(`🔸 [INTERVAL SEÇİMİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Seçilen interval: ${intervalT}`);
+        console.log(`🔹 [INTERVAL SEÇİMİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Seçilen interval: ${intervalT}`);
 
         try {
             await ctx.answerCbQuery("⏳ Hesaplama başladı...", true);
@@ -176,13 +177,10 @@ for (const key in intervals) {
             } catch { }
         }
 
-        console.log(
-            `[INTERVAL TAMAMLANDI]\n` +
-            `Tarih: ${timestamp}\n` +
-            `Kullanıcı ID: ${user.id}\n` +
-            `Interval: ${interval} (${intervalT})\n` +
-            `Gönderilen sonuç sayısı: ${top.length}\n`
-        );
+        toplam_islem_sayisi++;
+
+        console.log(`🔹 [SONUÇLAR GÖSTERİLDİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Interval: ${intervalT}`);
+        console.log(`⭐ Toplam işlem sayısı \x1b[1m\x1b[32m${toplam_islem_sayisi}\x1b[0m oldu.`);
     });
 }
 
