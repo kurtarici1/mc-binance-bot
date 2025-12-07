@@ -4,9 +4,9 @@ const express = require("express");
 
 const PORT = 10000;
 const app = express();
-const bot = new Telegraf(process.env.TG_BOT_TOKEN || "DEFAULT_BOT_TOKEN");
+const bot = new Telegraf(process.env.TG_BOT_TOKEN || "");
 const BASE_URL = "https://api.binance.com/api/v3";
-const toplam_islem_sayisi = 0;
+let toplam_islem_sayisi = 0;
 
 const intervals = {
     int_1m: "1m",
@@ -69,7 +69,13 @@ async function findTopGainers(interval) {
 bot.start(ctx => {
     const user = ctx.from;
     const timestamp = new Date().toLocaleString("tr-TR");
-    console.log(`🔸 [START KOMUTU] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""}`);
+
+    console.log(
+        `🔸\x1b[1m\x1b[36m · [START KOMUTU]\x1b[0m ` +
+        `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
+        `\x1b[1mID:\x1b[0m ${user.id} | ` +
+        `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""}`
+    );
 
     ctx.reply(
         "👋 *Hoş Geldiniz!*\n\n" +
@@ -91,7 +97,7 @@ bot.command("binance", ctx => {
     const timestamp = new Date().toLocaleString("tr-TR");
 
     console.log(
-        `🔸 \x1b[1m\x1b[36m[BINANCE KOMUTU]\x1b[0m ` +
+        `🔸\x1b[1m\x1b[36m · [BINANCE KOMUTU]\x1b[0m ` +
         `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
         `\x1b[1mID:\x1b[0m ${user.id} | ` +
         `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""}`
@@ -127,7 +133,7 @@ for (const key in intervals) {
         const user = ctx.from;
         const timestamp = new Date().toLocaleString("tr-TR");
         const interval = intervals[key];
-        const intervalT = interval;
+        let intervalT = interval;
 
         if (!intervalT.startsWith("Son ")) {
             if (intervalT.endsWith("m")) {
@@ -140,7 +146,7 @@ for (const key in intervals) {
         }
 
         console.log(
-            `🔹 \x1b[1m\x1b[36m[INTERVAL SEÇİMİ]\x1b[0m ` +
+            `🔹\x1b[1m\x1b[36m · [INTERVAL SEÇİMİ]\x1b[0m ` +
             `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
             `\x1b[1mID:\x1b[0m ${user.id} | ` +
             `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""} | ` +
@@ -192,14 +198,14 @@ for (const key in intervals) {
         toplam_islem_sayisi++;
 
         console.log(
-            `✔️ \x1b[1m\x1b[36m[SONUÇLAR GÖSTERİLDİ]\x1b[0m ` +
+            `✔️ \x1b[1m\x1b[32m · [SONUÇLAR GÖSTERİLDİ]\x1b[0m ` +
             `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
             `\x1b[1mID:\x1b[0m ${user.id} | ` +
             `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""} | ` +
             `\x1b[1mInterval:\x1b[0m ${intervalT}`
         );
 
-        console.log(`⭐ Toplam işlem sayısı \x1b[1m\x1b[32m${toplam_islem_sayisi}\x1b[0m oldu.`);
+        console.log(`\x1b[1m⭐ · Toplam işlem sayısı \x1b[31m${toplam_islem_sayisi}\x1b[37m oldu.\x1b[0m`);
     });
 }
 
@@ -210,8 +216,8 @@ async function startBot() {
 
     app.get("/", (req, res) => res.send("MC Binance Bot Telegram üzerinde aktif."));
     app.listen(PORT, () => {
-        console.log('\x1b[1m\x1b[32m🤖 MC Binance Telegram Bot Aktif.\x1b[0m');
-        console.log(`\x1b[1m🌐 Web Port Dinleme Aktif:\x1b[0m ${PORT}`);
+        console.log('\x1b[1m\x1b[32m🤖 · MC Binance Telegram Bot Aktif.\x1b[0m');
+        console.log(`\x1b[1m\x1b[31m🌐 · Web Port Dinleme Aktif:\x1b[0m \x1b[1m\x1b[33m${PORT}\x1b[0m`);
     });
 }
 
