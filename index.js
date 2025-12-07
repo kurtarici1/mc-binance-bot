@@ -89,7 +89,13 @@ bot.start(ctx => {
 bot.command("binance", ctx => {
     const user = ctx.from;
     const timestamp = new Date().toLocaleString("tr-TR");
-    console.log(`🔸 [BINANCE KOMUTU] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""}`);
+
+    console.log(
+        `🔸 \x1b[1m\x1b[36m[BINANCE KOMUTU]\x1b[0m ` +
+        `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
+        `\x1b[1mID:\x1b[0m ${user.id} | ` +
+        `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""}`
+    );
 
     ctx.reply(
         "⏱ *Hangi süreye göre analiz yapılsın?*",
@@ -109,7 +115,7 @@ bot.command("binance", ctx => {
                 [
                     Markup.button.callback("Son 4 saat", "int_4h"),
                     Markup.button.callback("Son 12 saat", "int_12h"),
-                    Markup.button.callback("Son 1 gün", "int_1d"),
+                    Markup.button.callback("Son 1 gün", "int_1d")
                 ]
             ])
         }
@@ -133,7 +139,13 @@ for (const key in intervals) {
             }
         }
 
-        console.log(`🔹 [INTERVAL SEÇİMİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Seçilen interval: ${intervalT}`);
+        console.log(
+            `🔹 \x1b[1m\x1b[36m[INTERVAL SEÇİMİ]\x1b[0m ` +
+            `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
+            `\x1b[1mID:\x1b[0m ${user.id} | ` +
+            `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""} | ` +
+            `\x1b[1mSeçilen interval:\x1b[0m ${intervalT}`
+        );
 
         try {
             await ctx.answerCbQuery("⏳ Hesaplama başladı...", true);
@@ -179,7 +191,14 @@ for (const key in intervals) {
 
         toplam_islem_sayisi++;
 
-        console.log(`✔️ [SONUÇLAR GÖSTERİLDİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Interval: ${intervalT}`);
+        console.log(
+            `✔️ \x1b[1m\x1b[36m[SONUÇLAR GÖSTERİLDİ]\x1b[0m ` +
+            `\x1b[1mTarih:\x1b[0m ${timestamp} | ` +
+            `\x1b[1mID:\x1b[0m ${user.id} | ` +
+            `\x1b[1mKullanıcı:\x1b[0m ${user.first_name} ${user.last_name || ""} | ` +
+            `\x1b[1mInterval:\x1b[0m ${intervalT}`
+        );
+
         console.log(`⭐ Toplam işlem sayısı \x1b[1m\x1b[32m${toplam_islem_sayisi}\x1b[0m oldu.`);
     });
 }
@@ -191,8 +210,8 @@ async function startBot() {
 
     app.get("/", (req, res) => res.send("MC Binance Bot Telegram üzerinde aktif."));
     app.listen(PORT, () => {
-        console.log('🤖 MC Binance Telegram Bot Aktif.');
-        console.log(`🌐 Web Port Dinleme Aktif : ${PORT}`);
+        console.log('\x1b[1m\x1b[32m🤖 MC Binance Telegram Bot Aktif.\x1b[0m');
+        console.log(`\x1b[1m🌐 Web Port Dinleme Aktif:\x1b[0m ${PORT}`);
     });
 }
 
