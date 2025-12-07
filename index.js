@@ -7,8 +7,6 @@ const app = express();
 const bot = new Telegraf(process.env.TG_BOT_TOKEN || "DEFAULT_BOT_TOKEN");
 const BASE_URL = "https://api.binance.com/api/v3";
 
-let istek_sayisi = 0;
-
 const intervals = {
     int_1m: "1m",
     int_3m: "3m",
@@ -70,14 +68,7 @@ async function findTopGainers(interval) {
 bot.start(ctx => {
     const user = ctx.from;
     const timestamp = new Date().toLocaleString("tr-TR");
-
-    console.log(
-        `\n[START KOMUTU]\n` +
-        `Tarih: ${timestamp}\n` +
-        `ID: ${user.id}\n` +
-        `Ad: ${user.first_name} ${user.last_name || ""}\n` +
-        `Username: @${user.username || "yok"}\n`
-    );
+    console.log(`🔸 [START KOMUTU] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""}`);
 
     ctx.reply(
         "👋 *Hoş Geldiniz!*\n\n" +
@@ -95,6 +86,10 @@ bot.start(ctx => {
 });
 
 bot.command("binance", ctx => {
+    const user = ctx.from;
+    const timestamp = new Date().toLocaleString("tr-TR");
+    console.log(`🔸 [BINANCE KOMUTU] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""}`);
+
     ctx.reply(
         "⏱ *Hangi süreye göre analiz yapılsın?*",
         {
@@ -125,23 +120,23 @@ for (const key in intervals) {
         const user = ctx.from;
         const timestamp = new Date().toLocaleString("tr-TR");
         const interval = intervals[key];
-        const intervalT = interval
-            .replace("m", " dakika")
-            .replace("h", " saat")
-            .replace("d", " gün");
+        const intervalT = interval;
 
-        console.log(
-            `\n[INTERVAL SEÇİMİ]\n` +
-            `Tarih: ${timestamp}\n` +
-            `Kullanıcı ID: ${user.id}\n` +
-            `Ad: ${user.first_name} ${user.last_name || ""}\n` +
-            `Username: @${user.username || "yok"}\n` +
-            `Seçilen Aralık: ${interval} (${intervalT})\n`
-        );
+        if (!intervalT.startsWith("Son ")) {
+            if (intervalT.endsWith("m")) {
+                intervalT = "Son " + intervalT.slice(0, -1) + " dakika";
+            } else if (intervalT.endsWith("h")) {
+                intervalT = "Son " + intervalT.slice(0, -1) + " saat";
+            } else if (intervalT.endsWith("d")) {
+                intervalT = "Son " + intervalT.slice(0, -1) + " gün";
+            }
+        }
 
-        try { 
-            await ctx.answerCbQuery("⏳ Hesaplama başladı...", true); 
-        } catch {}
+        console.log(`🔸 [INTERVAL SEÇİMİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Seçilen interval: ${intervalT}`);
+
+        try {
+            await ctx.answerCbQuery("⏳ Hesaplama başladı...", true);
+        } catch { }
 
         let loadingMessage;
         try {
@@ -176,9 +171,9 @@ for (const key in intervals) {
                 { parse_mode: "Markdown" }
             );
         } catch {
-            try { 
-                await ctx.reply(message, { parse_mode: "Markdown" }); 
-            } catch {}
+            try {
+                await ctx.reply(message, { parse_mode: "Markdown" });
+            } catch { }
         }
 
         console.log(
