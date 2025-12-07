@@ -179,7 +179,7 @@ for (const key in intervals) {
 
         toplam_islem_sayisi++;
 
-        console.log(`🔹 [SONUÇLAR GÖSTERİLDİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Interval: ${intervalT}`);
+        console.log(`✔️ [SONUÇLAR GÖSTERİLDİ] Tarih: ${timestamp} | ID: ${user.id} | Kullanıcı: ${user.first_name} ${user.last_name || ""} | Interval: ${intervalT}`);
         console.log(`⭐ Toplam işlem sayısı \x1b[1m\x1b[32m${toplam_islem_sayisi}\x1b[0m oldu.`);
     });
 }
