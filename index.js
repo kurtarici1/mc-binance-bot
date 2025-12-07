@@ -43,8 +43,8 @@ async function findTopGainers(interval) {
     try {
         const info = await axios.get(`${BASE_URL}/exchangeInfo`);
         const symbols = info.data.symbols
-            .filter(s => s.status === "TRADING" && (s.symbol.endsWith("USDT") || s.symbol.endsWith("BUSD")))
-            .map(s => s.symbol);
+            .filter(s => s.status === "TRADING" && s.contractType)
+            .map(s => s.symbol)
 
         const results = [];
 
