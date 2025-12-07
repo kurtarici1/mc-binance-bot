@@ -1,9 +1,9 @@
 const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
+const express = require("express");
 
-// API key'i ortam değişkeninden güvenli bir şekilde çeker.
+const app = express();
 const bot = new Telegraf(process.env.TG_BOT_TOKEN || "DEFAULT_BOT_TOKEN");
-
 const BASE_URL = "https://api.binance.com/api/v3";
 
 /**
@@ -202,5 +202,11 @@ async function startBot() {
     bot.launch();
     console.log("🤖 Bot çalışıyor...");
 }
+
+const PORT = process.env.PORT || 3000;
+app.get("/", (req, res) => res.send("Port aktif."));
+app.listen(PORT, () => {
+  console.log("Port dinleme başlatıldı: " + PORT);
+});
 
 startBot();
